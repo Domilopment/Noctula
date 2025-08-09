@@ -12,13 +12,11 @@ set -ouex pipefail
 # this installs a package from fedora repos
 dnf5 install -y tmux 
 
-# create opt folder
-mkdir -p /opt
-chmod 755 /opt
-
 # this installs docker desktop from website
 # download docker desktop rpm
 curl -L -o "/tmp/docker-desktop-x86_64.rpm" "https://desktop.docker.com/linux/main/amd64/docker-desktop-x86_64.rpm?utm_source=docker"
+# create target directory
+mkdir -p /opt/docker-desktop
 # install docker desktop
 dnf5 install -y "/tmp/docker-desktop-x86_64.rpm"
 
