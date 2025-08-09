@@ -9,6 +9,9 @@ set -ouex pipefail
 # List of rpmfusion packages can be found here:
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
 
+#debug
+echo "FINAL_LAYER_DIR is set to: $FINAL_LAYER_DIR"
+
 # this installs a package from fedora repos
 dnf5 install -y tmux 
 
@@ -20,12 +23,16 @@ mkdir -p /var/opt
 curl -L -o "/tmp/docker-desktop-x86_64.rpm" "https://desktop.docker.com/linux/main/amd64/docker-desktop-x86_64.rpm?utm_source=docker"
 # install docker desktop
 dnf5 install -y "/tmp/docker-desktop-x86_64.rpm"
+# copy installation files to usr/lib/opt/
+cp -a /var/opt/docker-desktop /usr/lib/opt/docker-desktop
 
 # this adss unity repo installs unityhub
 # add unity repo
 sh -c 'echo -e "[unityhub]\nname=Unity Hub\nbaseurl=https://hub.unity3d.com/linux/repos/rpm/stable\nenabled=1\ngpgcheck=1\ngpgkey=https://hub.unity3d.com/linux/repos/rpm/stable/repodata/repomd.xml.key\nrepo_gpgcheck=1" > /etc/yum.repos.d/unityhub.repo'
 # install unityhub
 dnf5 install -y unityhub
+# copy installation files to usr/lib/opt/
+cp -a /var/opt/unityhub /usr/lib/opt/unityhub
 # Disable the repo afterwards (sets enabled=0)
 sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/unityhub.repo
 
