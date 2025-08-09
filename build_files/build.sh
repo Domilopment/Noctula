@@ -12,6 +12,20 @@ set -ouex pipefail
 # this installs a package from fedora repos
 dnf5 install -y tmux 
 
+# this installs docker desktop from website
+# download docker desktop rpm
+curl -L -o "/tmp/docker-desktop-x86_64.rpm" "https://desktop.docker.com/linux/main/amd64/docker-desktop-x86_64.rpm?utm_source=docker"
+# install docker desktop
+dnf5 install -y "/tmp/docker-desktop-x86_64.rpm"
+
+# this adss unity repo installs unityhub
+# add unity repo
+sh -c 'echo -e "[unityhub]\nname=Unity Hub\nbaseurl=https://hub.unity3d.com/linux/repos/rpm/stable\nenabled=1\ngpgcheck=1\ngpgkey=https://hub.unity3d.com/linux/repos/rpm/stable/repodata/repomd.xml.key\nrepo_gpgcheck=1" > /etc/yum.repos.d/unityhub.repo'
+# install unityhub
+dnf5 install -y unityhub
+# Disable the repo afterwards (sets enabled=0)
+sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/unityhub.repo
+
 # Use a COPR Example:
 #
 # dnf5 -y copr enable ublue-os/staging
@@ -22,3 +36,7 @@ dnf5 install -y tmux
 #### Example for enabling a System Unit File
 
 systemctl enable podman.socket
+
+# cleanup stage
+# Clean temporary files
+rm -rf /tmp/*
