@@ -15,8 +15,9 @@ set -ouex pipefail
 # this installs a package from fedora repos
 dnf5 install -y tmux 
 
-# 1. Create the real target directory to fix broken symlink
+# Create the real target directory to fix broken symlink
 mkdir -p /var/opt
+mkdir -p /var/usrlocal/bin/
 
 # this installs docker desktop from website
 # download docker desktop rpm
@@ -24,7 +25,7 @@ curl -L -o "/tmp/docker-desktop-x86_64.rpm" "https://desktop.docker.com/linux/ma
 # install docker desktop
 dnf5 install -y "/tmp/docker-desktop-x86_64.rpm"
 # copy installation files to usr/lib/opt/
-cp -a /var/opt/docker-desktop /usr/lib/opt/docker-desktop
+mv /var/opt/docker-desktop /usr/lib/opt/docker-desktop
 
 # this adss unity repo installs unityhub
 # add unity repo
@@ -32,7 +33,7 @@ sh -c 'echo -e "[unityhub]\nname=Unity Hub\nbaseurl=https://hub.unity3d.com/linu
 # install unityhub
 dnf5 install -y unityhub
 # copy installation files to usr/lib/opt/
-cp -a /var/opt/unityhub /usr/lib/opt/unityhub
+mv /var/opt/unityhub /usr/lib/opt/unityhub
 # Disable the repo afterwards (sets enabled=0)
 sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/unityhub.repo
 
