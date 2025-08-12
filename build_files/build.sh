@@ -13,7 +13,7 @@ set -ouex pipefail
 #echo "FINAL_LAYER_DIR is set to: $FINAL_LAYER_DIR"
 
 # this installs a package from fedora repos
-dnf5 install -y tmux 
+# dnf5 install -y tmux # Example: already installed (aurora-dx image)
 
 # Create the real target directory to fix broken symlink
 mkdir -p /var/opt
@@ -26,6 +26,11 @@ curl -L -o "/tmp/docker-desktop-x86_64.rpm" "https://desktop.docker.com/linux/ma
 dnf5 install -y "/tmp/docker-desktop-x86_64.rpm"
 # copy installation files to usr/lib/opt/
 mv /var/opt/docker-desktop /usr/lib/opt/docker-desktop
+# Register path symlink
+cat >/usr/lib/tmpfiles.d/docker-desktop.conf <<EOF
+L /var/usrlocal/bin/compose-bridge - - - - /opt/docker-desktop/bin/compose-bridge
+L /var/usrlocal/bin/docker - - - - /usr/bin/docker
+EOF
 
 # this adss unity repo installs unityhub
 # add unity repo
