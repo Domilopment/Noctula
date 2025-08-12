@@ -28,7 +28,7 @@ dnf5 install -y "/tmp/docker-desktop-x86_64.rpm"
 mv /var/opt/docker-desktop /usr/lib/opt/docker-desktop
 # Register path symlink
 cat >/usr/lib/tmpfiles.d/docker-desktop.conf <<EOF
-L /var/usrlocal/bin/compose-bridge - - - - /opt/docker-desktop/bin/compose-bridge
+L /var/usrlocal/bin/compose-bridge - - - - /usr/lib/opt/docker-desktop/bin/compose-bridge
 L /var/usrlocal/bin/docker - - - - /usr/bin/docker
 EOF
 
