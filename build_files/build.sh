@@ -9,9 +9,6 @@ set -ouex pipefail
 # List of rpmfusion packages can be found here:
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
 
-#debug
-#echo "FINAL_LAYER_DIR is set to: $FINAL_LAYER_DIR"
-
 # this installs a package from fedora repos
 # dnf5 install -y tmux # Example: already installed (aurora-dx image)
 
@@ -28,6 +25,7 @@ dnf5 install -y "/tmp/docker-desktop-x86_64.rpm"
 mv /var/opt/docker-desktop /usr/lib/opt/docker-desktop
 # Register path symlink
 cat >/usr/lib/tmpfiles.d/docker-desktop.conf <<EOF
+d /var/usrlocal/bin 0755 root root - -
 L /var/usrlocal/bin/compose-bridge - - - - /usr/lib/opt/docker-desktop/bin/compose-bridge
 L /var/usrlocal/bin/docker - - - - /usr/bin/docker
 EOF
