@@ -5,7 +5,8 @@ on:
     branches:
       - main
   schedule:
-    - cron: '05 01 * * *'  # 01:05am UTC everyday
+    - cron: '05 10 * * *'  # 10:05am UTC everyday
+    - cron: '05 01 * * 3'  # 01:05am UTC wednesdays
   push:
     branches:
       - main
@@ -73,8 +74,16 @@ jobs:
 
       - name: Default Tag
         id: gen-default-tag
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+          BUILD_STABLE: ${{ github.event.inputs.build_stable }}
         run: |
-          DEFAULT_TAG=$(just generate-default-tag)
+          # Build release with stable tags on Wednesdays or when manually requested
+          if [[ "$SCHEDULE" == "05 01 * * 3" || "$BUILD_STABLE" == "true" ]]; then
+            DEFAULT_TAG=$(just generate-default-tag stable)
+          else
+            DEFAULT_TAG=$(just generate-default-tag)
+          fi
 
           echo "DEFAULT_TAG=${DEFAULT_TAG}" >> $GITHUB_ENV
 
@@ -116,15 +125,6 @@ jobs:
           alias_tags="$(just generate-build-tags \
                         ${IMAGE_NAME} \
                         ${DEFAULT_TAG})"
-
-          # Build release with stable tags on Wednesdays or when manually requested
-          if [[ "$(date -u +%u)" = "3" || "${{ github.event.inputs.build_stable }}" = "true" ]]; then
-            stable_tags="$(just generate-build-tags \
-                            ${IMAGE_NAME} \
-                            stable)"
-
-            alias_tags="${alias_tags} ${stable_tags}"
-          fi
 
           echo "Tags for this Action..."
           echo "${alias_tags}"

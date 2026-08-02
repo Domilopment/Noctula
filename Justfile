@@ -112,7 +112,11 @@ build $target_image=image_name $tag=default_tag:
     if [[ -z "$(git status -s)" ]]; then
         GIT_SHA=$(git rev-parse --short HEAD)
 
-        image_version="{{ default_tag }}-${fedora_version}.$(date +%Y%m%d)-${GIT_SHA}"
+        if [[ "${tag}" == "{{ default_tag }}" ]]; then
+            image_version="${tag}-${fedora_version}.$(date +%Y%m%d)-${GIT_SHA}"
+        else
+            image_version="${fedora_version}.$(date +%Y%m%d)-${GIT_SHA}"
+        fi
 
         BUILD_ARGS+=("--build-arg" "VERSION=${image_version}")
         BUILD_ARGS+=("--build-arg" "SHA_HEAD_SHORT=${GIT_SHA}")
