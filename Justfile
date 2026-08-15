@@ -177,7 +177,6 @@ rechunk $target_image=image_name $tag=default_tag:
       --mount=type=image,src="${target_image}:${tag}",target=/chunkah \
       -v "${CHUNKAH_CONFIG_FILE}:/chunkah-config.json:ro,Z" \
       -v "${CHUNKAH_OUTPUT_DIR}:/run/out:Z" \
-      -e SOURCE_DATE_EPOCH=0 \
       quay.io/coreos/chunkah:latest \
       build \
       --verbose \
@@ -197,28 +196,29 @@ ostree-rechunk $target_image=image_name $tag=default_tag:
 
     set -xeuo pipefail
 
-    # TODO: This is the only blocker for rootless CI
-    # https://github.com/coreos/rpm-ostree/issues/5346
-    if [[ ! "${UID}" -eq "0" ]]; then
-      echo "This needs to run as root."
-      exit 1
-    fi
+    # Use the already-built local image to avoid pulling from a remote registry
+    RPM_OSTREE_CHUNKER_IMAGE="localhost/${target_image}:${tag}"
 
-    # You can use your own base image here to avoid pulling fedora-bootc
-    RPM_OSTREE_CHUNKER_IMAGE="quay.io/fedora/fedora-bootc:latest"
+    RPM_OSTREE_OUTPUT_DIR="$(mktemp -d ./"${target_image}"_rpm-ostree_XXXXXX)"
+
+    trap 'rm -rf "${RPM_OSTREE_OUTPUT_DIR}"' EXIT
 
     podman run --rm \
-      --pull=newer \
+      --pull=never \
+      --mount=type=image,src="${target_image}:${tag}",target=/rpm-ostree \
       --privileged \
-      -v "/var/lib/containers:/var/lib/containers" \
+      -v "${RPM_OSTREE_OUTPUT_DIR}:/run/out:Z" \
       --entrypoint /usr/bin/rpm-ostree \
       "${RPM_OSTREE_CHUNKER_IMAGE}" \
       compose build-chunked-oci \
       --max-layers 127 \
       --format-version=2 \
       --bootc \
-      --from "localhost/${target_image}:${tag}" \
-      --output containers-storage:"localhost/${target_image}:${tag}"
+      --rootfs /rpm-ostree \
+      --output oci-archive:/run/out/"${target_image}.oci"
+
+    CHUNKED_IMAGE="$(podman pull oci-archive:"${RPM_OSTREE_OUTPUT_DIR}/${target_image}.oci")"
+    podman tag "${CHUNKED_IMAGE}" "${target_image}:${tag}"
 
 # Generate Default Tag
 [group('Utility')]
