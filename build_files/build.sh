@@ -51,6 +51,9 @@ EOF
 # Disable the repo afterwards (sets enabled=0)
 #sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/unityhub.repo
 
+# Remove Aurora Preferences since they do not work properly on the custom image
+dnf5 remove -y kcm_ublue
+
 # Use a COPR Example:
 #
 # dnf5 -y copr enable ublue-os/staging
